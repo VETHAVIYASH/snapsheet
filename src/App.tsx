@@ -12,23 +12,51 @@ interface Screenshot {
   id: string;
   file: File;
   preview: string;
+  width: number;
+  height: number;
 }
 
 interface LayoutConfig {
-  rows: number;
-  cols: number;
+  rows: number; // Ignored
+  cols: number; // Ignored
+  margin: number; // mm
+  gap: number; // mm
+  allowRotation: boolean;
+  scale: number; // Factor (e.g. 0.1)
+  shrinkTolerance: number;
 }
 
 function App() {
   const [images, setImages] = useState<Screenshot[]>([]);
-  const [config, setConfig] = useState<LayoutConfig>({ rows: 3, cols: 2 });
+  const [config, setConfig] = useState<LayoutConfig>({
+    rows: 3,
+    cols: 2,
+    margin: 0,
+    gap: 5,
+    allowRotation: false,
+    scale: 0.1,
+    shrinkTolerance: 0
+  });
 
-  const handleImagesSelected = useCallback((files: File[]) => {
-    const newImages = files.map(file => ({
-      id: crypto.randomUUID(),
-      file,
-      preview: URL.createObjectURL(file)
-    }));
+  const handleImagesSelected = useCallback(async (files: File[]) => {
+    const newImages: Screenshot[] = [];
+
+    for (const file of files) {
+      const preview = URL.createObjectURL(file);
+      // Load image to get dimensions
+      const img = new Image();
+      img.src = preview;
+      await new Promise((resolve) => { img.onload = resolve; });
+
+      newImages.push({
+        id: crypto.randomUUID(),
+        file,
+        preview,
+        width: img.width,
+        height: img.height
+      });
+    }
+
     setImages(prev => [...prev, ...newImages]);
   }, []);
 

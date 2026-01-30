@@ -1,14 +1,22 @@
 import jsPDF from 'jspdf';
+import { packImages } from './layoutEngine';
 
 interface Screenshot {
     id: string;
     file: File;
     preview: string;
+    width: number;
+    height: number;
 }
 
 interface LayoutConfig {
     rows: number;
     cols: number;
+    margin: number;
+    gap: number;
+    allowRotation: boolean;
+    scale: number;
+    shrinkTolerance: number;
 }
 
 export const generatePDF = async (images: Screenshot[], config: LayoutConfig) => {
@@ -22,70 +30,52 @@ export const generatePDF = async (images: Screenshot[], config: LayoutConfig) =>
 
     const pageWidth = 210;
     const pageHeight = 297;
-    const margin = 10; // 10mm margin
-    const gap = 5; // 5mm gap between images
 
-    const contentWidth = pageWidth - (2 * margin);
-    const contentHeight = pageHeight - (2 * margin);
+    // Use LayoutEngine to position images
+    const packedItems = packImages(images, {
+        pageWidth: pageWidth,
+        pageHeight: pageHeight,
+        margin: config.margin,
+        gap: config.gap,
+        allowRotation: config.allowRotation,
+        scale: config.scale,
+        shrinkTolerance: config.shrinkTolerance
+    });
 
-    // Calculate cell dimensions including gap
-    // Total width = (cols * cellW) + ((cols - 1) * gap)
-    // cellW = (TotalWidth - (cols - 1) * gap) / cols
+    // Sort items by page
+    packedItems.sort((a, b) => a.pageIndex - b.pageIndex);
 
-    const cellWidth = (contentWidth - ((config.cols - 1) * gap)) / config.cols;
-    const cellHeight = (contentHeight - ((config.rows - 1) * gap)) / config.rows;
+    let currentPage = 0;
 
-    const itemsPerPage = config.rows * config.cols;
+    for (const item of packedItems) {
+        // Find original image
+        const imgData = images.find(img => img.id === item.id);
+        if (!imgData) continue;
 
-    for (let i = 0; i < images.length; i++) {
-        const imgData = images[i];
-
-        // Add new page if needed
-        if (i > 0 && i % itemsPerPage === 0) {
+        // Add pages if needed
+        while (currentPage < item.pageIndex) {
             doc.addPage();
+            currentPage++;
         }
 
-        const indexOnPage = i % itemsPerPage;
-        const colIndex = indexOnPage % config.cols;
-        const rowIndex = Math.floor(indexOnPage / config.cols);
-
-        const x = margin + (colIndex * (cellWidth + gap));
-        const y = margin + (rowIndex * (cellHeight + gap));
-
-        // Load image to get dimensions
+        // Load Image
         const img = new Image();
         img.src = imgData.preview;
         await new Promise((resolve) => {
             img.onload = resolve;
         });
 
-        // Calculate dimensions to fit in cell while maintaining aspect ratio
-        const imgRatio = img.width / img.height;
-        const cellRatio = cellWidth / cellHeight;
+        const x = item.x;
+        const y = item.y;
 
-        let finalW = cellWidth;
-        let finalH = cellHeight;
-        let offsetX = 0;
-        let offsetY = 0;
-
-        if (imgRatio > cellRatio) {
-            // Image is wider than cell (relative to aspect)
-            finalH = cellWidth / imgRatio;
-            offsetY = (cellHeight - finalH) / 2;
+        if (item.rotated) {
+            // Draw rotated 90 degrees clockwise
+            // Fits into box (item.width, item.height) on page.
+            doc.addImage(img, 'JPEG', x + item.width, y, item.height, item.width, undefined, 'FAST', 90);
         } else {
-            // Image is taller than cell
-            finalW = cellHeight * imgRatio;
-            offsetX = (cellWidth - finalW) / 2;
+            // Draw normal
+            doc.addImage(img, 'JPEG', x, y, item.width, item.height);
         }
-
-        // Add image to PDF
-        // Note: jsPDF needs raw image data or base64. 
-        // objectURL might work depending on browser, but safer to convert to base64 or pass the HTMLImageElement if supported.
-        // jsPDF addImage supports HTMLImageElement since v2.0.
-        doc.addImage(img, 'JPEG', x + offsetX, y + offsetY, finalW, finalH);
-
-        // Optional: Draw cell border for debugging or style
-        // doc.rect(x, y, cellWidth, cellHeight); 
     }
 
     doc.save('snapsheet.pdf');

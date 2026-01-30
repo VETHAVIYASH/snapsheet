@@ -2,8 +2,13 @@ import React from 'react';
 import { Layout, Download, Grid } from 'lucide-react';
 
 interface LayoutConfig {
-    rows: number;
-    cols: number;
+    rows: number; // Keeping for compatibility or remove? Better remove or ignore. 
+    cols: number; // Ignored in packing mode
+    margin: number;
+    gap: number;
+    allowRotation: boolean;
+    scale: number;
+    shrinkTolerance: number;
 }
 
 interface ControlsProps {
@@ -23,39 +28,87 @@ export const Controls: React.FC<ControlsProps> = ({ config, onConfigChange, onDo
             <div className="space-y-6 flex-1">
                 <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Columns ({config.cols})
+                        Image Scale ({(config.scale * 100).toFixed(0)}%)
                     </label>
                     <input
                         type="range"
-                        min="1"
-                        max="4"
-                        value={config.cols}
-                        onChange={(e) => onConfigChange({ ...config, cols: Number(e.target.value) })}
+                        min="0.01"
+                        max="0.5"
+                        step="0.01"
+                        value={config.scale}
+                        onChange={(e) => onConfigChange({ ...config, scale: Number(e.target.value) })}
                         className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
                     />
                 </div>
 
                 <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Rows ({config.rows})
+                        Shrink Tolerance ({(config.shrinkTolerance * 100).toFixed(0)}%)
                     </label>
                     <input
                         type="range"
-                        min="1"
-                        max="6"
-                        value={config.rows}
-                        onChange={(e) => onConfigChange({ ...config, rows: Number(e.target.value) })}
+                        min="0"
+                        max="0.5"
+                        step="0.01"
+                        value={config.shrinkTolerance}
+                        onChange={(e) => onConfigChange({ ...config, shrinkTolerance: Number(e.target.value) })}
                         className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
                     />
+                    <p className="text-xs text-gray-500 mt-1">
+                        Allow shrinking up to this % to fill holes.
+                    </p>
+                </div>
+
+                <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Margin ({config.margin}mm)
+                    </label>
+                    <input
+                        type="range"
+                        min="0"
+                        max="20"
+                        step="1"
+                        value={config.margin}
+                        onChange={(e) => onConfigChange({ ...config, margin: Number(e.target.value) })}
+                        className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
+                    />
+                </div>
+
+                <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Gap ({config.gap}mm)
+                    </label>
+                    <input
+                        type="range"
+                        min="0"
+                        max="20"
+                        step="1"
+                        value={config.gap}
+                        onChange={(e) => onConfigChange({ ...config, gap: Number(e.target.value) })}
+                        className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
+                    />
+                </div>
+
+                <div className="flex items-center gap-3">
+                    <input
+                        type="checkbox"
+                        id="allowRotation"
+                        checked={config.allowRotation}
+                        onChange={(e) => onConfigChange({ ...config, allowRotation: e.target.checked })}
+                        className="w-5 h-5 text-blue-600 rounded focus:ring-blue-500 border-gray-300"
+                    />
+                    <label htmlFor="allowRotation" className="text-sm font-medium text-gray-700 select-none">
+                        Auto-Rotate Images
+                    </label>
                 </div>
 
                 <div className="p-4 bg-blue-50 rounded-lg border border-blue-100">
                     <div className="flex items-center gap-2 text-blue-800 mb-2">
                         <Grid className="w-4 h-4" />
-                        <span className="text-sm font-medium">Grid Info</span>
+                        <span className="text-sm font-medium">Layout Info</span>
                     </div>
                     <p className="text-xs text-blue-600">
-                        {config.rows * config.cols} images per page
+                        Images are automatically packed to minimize space.
                     </p>
                 </div>
             </div>
