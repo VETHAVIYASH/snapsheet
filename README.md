@@ -1,73 +1,63 @@
-# React + TypeScript + Vite
+# SnapSheet
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+SnapSheet is a modern web application designed to turn your screenshots and images into perfectly formatted, printer-ready A4 PDF documents. It uses a sophisticated 2D bin packing algorithm to maximize space and efficiency.
 
-Currently, two official plugins are available:
+## 🌟 The "Why"
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+### The Problem
+When documenting software, reporting bugs, or creating visual guides, we often end up with a large collection of screenshots. Manually resizing and arranging these into a document (like Word or a basic PDF) is:
+-   **Time-Consuming**: Hours spent dragging and aligning images.
+-   **Inefficient**: Lots of wasted white space on A4 pages.
+-   **Unprofessional**: Inconsistent image sizes and misaligned layouts.
 
-## React Compiler
+### Our Motivation
+SnapSheet was built to automate the tedious parts of documentation. By using a **Smart Bin Packing algorithm**, it treats your screenshots like a puzzle, finding the optimal way to fit them onto the fewest number of pages possible. We believe your time should be spent on the content, not the formatting.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## 🚀 Features
 
-## Expanding the ESLint configuration
+-   **Smart Auto-Layout**: Automatically packs images of varying sizes onto A4 pages using a MaxRects-based algorithm.
+-   **Live Interactive Preview**: See exactly how your PDF will look as you upload and rearrange images.
+-   **Drag & Drop Reordering**: Easily change the order of your screenshots with a smooth drag-and-drop interface.
+-   **Customizable Layout**: Control margins, gaps, image scaling, and allow rotation to get the perfect fit.
+-   **Client-Side PDF Generation**: Fast, high-quality PDF generation directly in your browser.
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## 🛠️ Built With
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+-   **[React 19](https://react.dev/)** + **[TypeScript](https://www.typescriptlang.org/)**
+-   **[Vite](https://vitejs.dev/)** for lightning-fast development
+-   **[Tailwind CSS](https://tailwindcss.com/)** for a clean, modern UI
+-   **[@dnd-kit](https://dndkit.com/)** for robust drag-and-drop functionality
+-   **[jsPDF](https://github.com/parallax/jsPDF)** for precise PDF generation
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+## 📦 Getting Started
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+### Prerequisites
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+-   [Node.js](https://nodejs.org/) (v18 or higher)
+-   npm or yarn
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+### Installation
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+1.  Clone the repository:
+    ```bash
+    git clone https://github.com/VETHAVIYASH/snapsheet.git
+    ```
+2.  Install dependencies:
+    ```bash
+    npm install
+    ```
+3.  Start the development server:
+    ```bash
+    npm run dev
+    ```
+
+## 🏗️ Project Structure
+
+-   `src/components/`: UI components (UploadZone, LayoutPreview, Controls)
+-   `src/utils/layoutEngine.ts`: The core 2D bin packing logic
+-   `src/utils/pdfGenerator.ts`: Handles PDF conversion and download
+-   `src/App.tsx`: Main application state and layout
+
+## 📜 License
+
+Distributed under the MIT License. See `LICENSE` for more information.
